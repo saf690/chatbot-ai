@@ -3,10 +3,9 @@ from flask_cors import CORS
 import csv
 from datetime import datetime
 import os
-import requests
 
 app = Flask(__name__)
-CORS(app)  # IMPORTANT for Botpress
+CORS(app)
 
 # ---------------------------
 # CREATE CSV FILE
@@ -16,31 +15,14 @@ if not os.path.exists("leads.csv"):
         writer = csv.writer(file)
         writer.writerow(["DateTime", "Name", "Phone", "Location", "Intent"])
 
-
-# ---------------------------
-# AI FUNCTION (OPTIONAL)
-# ---------------------------
-def get_ai_reply(user_message):
-    try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "gemma:2b",
-                "prompt": user_message,
-                "stream": False
-            }
-        )
-        return response.json()["response"].strip()
-    except:
-        return "AI not available"
-
-
 # ---------------------------
 # SAVE LEAD API
 # ---------------------------
 @app.route("/chat", methods=["POST"])
 def save_lead():
     data = request.json
+
+    print("🔥 DATA RECEIVED:", data)  # DEBUG
 
     name = data.get("name")
     phone = data.get("phone")
@@ -61,6 +43,12 @@ def save_lead():
 
     return jsonify({"status": "success"})
 
+# ---------------------------
+# HEALTH CHECK (IMPORTANT FOR RENDER)
+# ---------------------------
+@app.route("/")
+def home():
+    return "Backend is running"
 
 # ---------------------------
 # RUN SERVER
