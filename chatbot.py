@@ -3,12 +3,13 @@ from flask_cors import CORS
 import csv
 from datetime import datetime
 import os
+import requests  # ✅ NEW
 
 app = Flask(__name__)
 CORS(app)
 
 # ---------------------------
-# CREATE CSV FILE
+# CREATE CSV FILE (optional backup)
 # ---------------------------
 if not os.path.exists("leads.csv"):
     with open("leads.csv", "w", newline="", encoding="utf-8") as file:
@@ -30,6 +31,9 @@ def save_lead():
         location = data.get("location")
         intent = data.get("intent")
 
+        # ---------------------------
+        # SAVE TO CSV (backup)
+        # ---------------------------
         with open("leads.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow([
@@ -40,11 +44,28 @@ def save_lead():
                 intent
             ])
 
+        # ---------------------------
+        # SEND TO GOOGLE SHEETS ✅
+        # ---------------------------
+        try:
+            requests.post(
+                "https://script.google.com/macros/s/AKfycbw8KM8M8FbcBF7u_mcBR5CBwlFOJT1sDapaarP-en7VOzpwZR5vvSAm9M-LNjHFMDghUg/exec",
+                json={
+                    "name": name,
+                    "phone": phone,
+                    "location": location,
+                    "intent": intent
+                }
+            )
+            print("📊 Sent to Google Sheets", flush=True)
+
+        except Exception as e:
+            print("❌ Google Sheets Error:", str(e), flush=True)
+
         print("✅ New Lead Saved:", name, phone, flush=True)
 
         return jsonify({
-            "status": "success",
-            "message": "Lead saved successfully"
+            "status": "success"
         })
 
     except Exception as e:
@@ -55,7 +76,7 @@ def save_lead():
         }), 500
 
 # ---------------------------
-# HEALTH CHECK (IMPORTANT)
+# HEALTH CHECK
 # ---------------------------
 @app.route("/", methods=["GET"])
 def home():
