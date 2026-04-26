@@ -20,33 +20,44 @@ if not os.path.exists("leads.csv"):
 # ---------------------------
 @app.route("/chat", methods=["POST"])
 def save_lead():
-    data = request.json
+    try:
+        data = request.get_json(force=True)
 
-    print("🔥 DATA RECEIVED:", data)  # DEBUG
+        print("🔥 FULL DATA RECEIVED:", data, flush=True)
 
-    name = data.get("name")
-    phone = data.get("phone")
-    location = data.get("location")
-    intent = data.get("intent")
+        name = data.get("name")
+        phone = data.get("phone")
+        location = data.get("location")
+        intent = data.get("intent")
 
-    with open("leads.csv", "a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow([
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            name,
-            phone,
-            location,
-            intent
-        ])
+        with open("leads.csv", "a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                name,
+                phone,
+                location,
+                intent
+            ])
 
-    print("✅ New Lead Saved:", name, phone)
+        print("✅ New Lead Saved:", name, phone, flush=True)
 
-    return jsonify({"status": "success"})
+        return jsonify({
+            "status": "success",
+            "message": "Lead saved successfully"
+        })
+
+    except Exception as e:
+        print("❌ ERROR:", str(e), flush=True)
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 # ---------------------------
-# HEALTH CHECK (IMPORTANT FOR RENDER)
+# HEALTH CHECK (IMPORTANT)
 # ---------------------------
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     return "Backend is running"
 
