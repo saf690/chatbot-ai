@@ -19,7 +19,7 @@ app.post("/lead", async (req, res) => {
     const { name, phone, location, service } = req.body;
 
     const scriptURL =
-      "https://script.google.com/macros/s/AKfycbx7Ms_CFKTCiv7DzukjVKN38zVXgMTAhUn2tbXghRvpW5JY0-fwQ4XTcw40BwrKbVhH7Q/exec";
+      "https://script.google.com/macros/s/AKfycbz1jSl0RDjKqtLU5M_KmfVi0bqW9kKAmse59rqtKodInABd5YT-fYa9n3onULxoP3UBPg/exec";
 
     const response = await fetch(scriptURL, {
       method: "POST",
